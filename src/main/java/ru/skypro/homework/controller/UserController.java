@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(@RequestBody MultipartFile uploadedFile) {
+    public ResponseEntity<String> uploadImage(@RequestParam MultipartFile image) {
         return ResponseEntity.ok("File uploaded successfully");
     }
 }

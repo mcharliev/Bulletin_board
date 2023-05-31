@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public class Comment {
     private Integer author;
     private String authorImage;
-    private String authorFirthName;
-    private LocalDateTime createAt;
+    private String authorFirstName;
+    private Long createAt;
     private Integer pk;
     private String text;
 }
