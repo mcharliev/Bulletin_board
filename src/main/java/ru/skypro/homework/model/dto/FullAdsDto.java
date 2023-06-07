@@ -1,9 +1,9 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.model.dto;
 
 import lombok.Data;
 
 @Data
-public class FullAds {
+public class FullAdsDto {
     private Integer pk;
     private String authorFirstName;
     private String authorLastName;
@@ -13,5 +13,4 @@ public class FullAds {
     private String phone;
     private Integer price;
     private String title;
-
 }

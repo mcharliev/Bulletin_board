@@ -1,30 +1,33 @@
 package ru.skypro.homework.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.*;
-
+import ru.skypro.homework.model.dto.*;
+import ru.skypro.homework.service.impl.AdsServiceImpl;
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/ads")
 @CrossOrigin(value = "http://localhost:3000")
 public class AdsController {
+    private final AdsServiceImpl adsService;
     @GetMapping
-    public ResponseEntity<ResponseWrapperAds> getAllAds() {
-        return ResponseEntity.ok(new ResponseWrapperAds());
+    public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
+        return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Ads> createAds(
+    public ResponseEntity<AdsDto> createAds(
             @RequestPart("image") MultipartFile file,
-            @RequestPart("properties") CreateAds createAds) {
-        return ResponseEntity.ok(new Ads());
+            @RequestPart("properties") CreateAdsDto createAds) {
+        return ResponseEntity.ok(new AdsDto());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FullAds> getAds(@PathVariable Integer id) {
-        return ResponseEntity.ok(new FullAds());
+    public ResponseEntity<FullAdsDto> getAds(@PathVariable Integer id) {
+        return ResponseEntity.ok(adsService.getAdsById(id));
     }
 
     @DeleteMapping("/{id}")
@@ -33,14 +36,14 @@ public class AdsController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity <CreateAds> updateAds(@PathVariable Integer id,
-                               @RequestBody Ads ads) {
-        return ResponseEntity.ok(new CreateAds());
+    public ResponseEntity <CreateAdsDto> updateAds(@PathVariable Integer id,
+                                                   @RequestBody AdsDto ads) {
+        return ResponseEntity.ok(new CreateAdsDto());
     }
 
     @GetMapping("/me")
-    public ResponseEntity <ResponseWrapperAds> getAdsMe() {
-        return ResponseEntity.ok(new ResponseWrapperAds());
+    public ResponseEntity <ResponseWrapperAdsDto> getAdsMe() {
+        return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
 
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -50,14 +53,14 @@ public class AdsController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity <ResponseWrapperComment> getAdsComments(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ResponseWrapperComment());
+    public ResponseEntity <ResponseWrapperCommentDto> getAdsComments(@PathVariable Integer id) {
+        return ResponseEntity.ok(new ResponseWrapperCommentDto());
     }
 
     @PostMapping("/{id}/comments")
-    public ResponseEntity <Comment> createAdsComment(@PathVariable Integer id,
-                                    @RequestBody Comment comment) {
-        return ResponseEntity.ok(new Comment());
+    public ResponseEntity <CommentDto> createAdsComment(@PathVariable Integer id,
+                                                        @RequestBody CommentDto comment) {
+        return ResponseEntity.ok(new CommentDto());
     }
 
     @DeleteMapping("/{adId}/comments/{commentId}/")
@@ -66,9 +69,9 @@ public class AdsController {
     }
 
     @PatchMapping("/{adId}/comments/{commentId}/")
-    public ResponseEntity <Comment> editAdsComment(@PathVariable("adId") String adId,
-                                  @PathVariable("commentId") Integer commentId,
-                                  @RequestBody Comment Comment) {
-        return ResponseEntity.ok(new Comment());
+    public ResponseEntity <CommentDto> editAdsComment(@PathVariable("adId") String adId,
+                                                      @PathVariable("commentId") Integer commentId,
+                                                      @RequestBody CommentDto Comment) {
+        return ResponseEntity.ok(new CommentDto());
     }
 }

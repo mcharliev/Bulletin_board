@@ -1,11 +1,9 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.model.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-public class Comment {
+public class CommentDto {
     private Integer author;
     private String authorImage;
     private String authorFirstName;

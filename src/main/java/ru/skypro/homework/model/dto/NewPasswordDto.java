@@ -1,9 +1,9 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.model.dto;
 
 import lombok.Data;
 
 @Data
-public class NewPassword {
+public class NewPasswordDto {
     private String currentPassword;
     private String newPassword;
 }
