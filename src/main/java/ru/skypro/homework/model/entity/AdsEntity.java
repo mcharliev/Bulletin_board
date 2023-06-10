@@ -35,8 +35,8 @@ public class AdsEntity {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    UserEntity author;
+    private UserEntity author;
 
     @OneToMany(mappedBy = "ads")
-    List<CommentEntity> comments;
+    private List<CommentEntity> comments;
 }

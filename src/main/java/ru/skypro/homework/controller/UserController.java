@@ -1,28 +1,25 @@
 package ru.skypro.homework.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
-import ru.skypro.homework.service.impl.UserServiceImpl;
+import ru.skypro.homework.service.UserService;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(value = "http://localhost:3000")
 public class UserController {
-    private final UserServiceImpl userService;
-
-    public UserController(UserServiceImpl userService) {
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) {
-        return ResponseEntity.ok(new UserDto());
+        return ResponseEntity.ok(userService.update(user));
     }
 
     @GetMapping("/me")

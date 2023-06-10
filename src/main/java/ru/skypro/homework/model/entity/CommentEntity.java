@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,17 +17,11 @@ import javax.persistence.*;
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pk")
-    private Integer pk;
-
-    @Column(name = "author_image")
-    private String authorImage;
-
-    @Column(name = "author_firstName")
-    private String authorFirstName;
+    @Column(name = "id")
+    private Integer id;
 
     @Column(name = "created_at")
-    private Long createdAt;
+    private LocalDateTime localDateTime;
 
     @Column(name = "text")
     private String text;
@@ -37,6 +32,5 @@ public class CommentEntity {
 
     @ManyToOne
     @JoinColumn(name = "ads_id")
-    AdsEntity ads;
-
+    private AdsEntity ads;
 }

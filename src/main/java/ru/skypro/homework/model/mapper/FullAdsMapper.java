@@ -15,7 +15,7 @@ public interface FullAdsMapper {
     @Mapping(target = "authorLastName",source = "author.lastName")
     @Mapping(target = "phone",source = "author.phone")
     @Mapping(target = "email",source = "author.email")
-    FullAdsDto AdsEntityToFullAdsDto(AdsEntity adsEntity);
+    FullAdsDto adsEntityToFullAdsDto(AdsEntity adsEntity);
 
     FullAdsDto toFullAdsDto(UserEntity userEntity);
 
