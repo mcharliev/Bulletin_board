@@ -3,6 +3,7 @@ package ru.skypro.homework.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.*;
@@ -19,14 +20,14 @@ public class AdsController {
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
-        return ResponseEntity.ok(new ResponseWrapperAdsDto());
+        return ResponseEntity.ok(adsService.getAllAds());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> createAds(
             @RequestPart("image") MultipartFile file,
             @RequestPart("properties") CreateAdsDto createAds) {
-        return ResponseEntity.ok(new AdsDto());
+        return ResponseEntity.ok(adsService.createAds(createAds));
     }
 
     @GetMapping("/{id}")
@@ -36,18 +37,18 @@ public class AdsController {
 
     @DeleteMapping("/{id}")
     public void deleteAds(@PathVariable Integer id) {
-
+        adsService.delete(id);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CreateAdsDto> updateAds(@PathVariable Integer id,
                                                   @RequestBody AdsDto ads) {
-        return ResponseEntity.ok(new CreateAdsDto());
+        return ResponseEntity.ok(adsService.editAds(id,ads));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe() {
-        return ResponseEntity.ok(new ResponseWrapperAdsDto());
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication authentication) {
+        return ResponseEntity.ok(adsService.getAllMyAds(authentication));
     }
 
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -77,11 +78,5 @@ public class AdsController {
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody CommentDto Comment) {
         return ResponseEntity.ok(new CommentDto());
-    }
-
-    @PostMapping("/{id}/ads")
-    public ResponseEntity<AdsDto> createAds(@PathVariable Integer id,
-                                            @RequestBody AdsDto adsDto) {
-        return ResponseEntity.ok(adsService.createAds(id, adsDto));
     }
 }

@@ -9,5 +9,5 @@ public class RegisterReqDto {
     private String firstName;
     private String lastName;
     private String phone;
-    private RoleDto role;
+    private Role role;
 }

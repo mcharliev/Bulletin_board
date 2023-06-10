@@ -4,6 +4,7 @@ package ru.skypro.homework.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.NewPasswordDto;
@@ -18,18 +19,20 @@ public class UserController {
     private final UserService userService;
 
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) {
-        return ResponseEntity.ok(userService.update(user));
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto,
+                                              Authentication authentication) {
+        return ResponseEntity.ok(userService.update(userDto,authentication));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> updateUser() {
-        return ResponseEntity.ok(new UserDto());
+    public ResponseEntity<UserDto> updateUser(Authentication authentication) {
+        return ResponseEntity.ok(userService.getUser(authentication));
     }
 
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> updatePassword(@RequestBody NewPasswordDto newPassword) {
-        return ResponseEntity.ok(new NewPasswordDto());
+    public ResponseEntity<NewPasswordDto> updatePassword(@RequestBody NewPasswordDto newPassword,
+                                                         Authentication authentication) {
+        return ResponseEntity.ok(userService.setPassword(newPassword,authentication));
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.skypro.homework.model.dto.Role;
 
 import javax.persistence.*;
 import java.util.List;
@@ -34,6 +35,13 @@ public class UserEntity {
 
     @Column(name = "image")
     private String image;
+
+    @Column(name = "password")
+    private String password;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "author")
     private List<CommentEntity> comments;
