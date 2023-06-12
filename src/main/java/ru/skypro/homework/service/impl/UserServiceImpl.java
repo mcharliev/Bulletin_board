@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUser(Authentication authentication) {
+    public UserDto getUserDto(Authentication authentication) {
         String email = authentication.getName();
         UserEntity userEntity = userRepository.findByEmail(email).get();
         return userMapper.userEntityToUserDto(userEntity);
@@ -42,5 +42,9 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-
+    @Override
+    public UserEntity getUserEntity(Authentication authentication) {
+        String email = authentication.getName();
+        return userRepository.findByEmail(email).get();
+    }
 }

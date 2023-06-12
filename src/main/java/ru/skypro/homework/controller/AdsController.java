@@ -26,8 +26,9 @@ public class AdsController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> createAds(
             @RequestPart("image") MultipartFile file,
-            @RequestPart("properties") CreateAdsDto createAds) {
-        return ResponseEntity.ok(adsService.createAds(createAds));
+            @RequestPart("properties") CreateAdsDto createAds,
+            Authentication authentication) {
+        return ResponseEntity.ok(adsService.createAds(createAds, authentication));
     }
 
     @GetMapping("/{id}")
@@ -43,7 +44,7 @@ public class AdsController {
     @PatchMapping("/{id}")
     public ResponseEntity<CreateAdsDto> updateAds(@PathVariable Integer id,
                                                   @RequestBody AdsDto ads) {
-        return ResponseEntity.ok(adsService.editAds(id,ads));
+        return ResponseEntity.ok(adsService.editAds(id, ads));
     }
 
     @GetMapping("/me")
@@ -59,24 +60,26 @@ public class AdsController {
 
     @GetMapping("/{id}/comments")
     public ResponseEntity<ResponseWrapperCommentDto> getAdsComments(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ResponseWrapperCommentDto());
+        return ResponseEntity.ok(commentService.getAllAdsComment(id));
     }
 
     @PostMapping("/{id}/comments")
     public ResponseEntity<CommentDto> createAdsComment(@PathVariable Integer id,
-                                                       @RequestBody CommentDto comment) {
-        return ResponseEntity.ok(commentService.createComment(id, comment));
+                                                       @RequestBody CommentDto comment,
+                                                       Authentication authentication) {
+        return ResponseEntity.ok(commentService.createComment(id, comment, authentication));
     }
 
     @DeleteMapping("/{adId}/comments/{commentId}/")
-    public void deleteAdsComment(@PathVariable("adId") String adId,
+    public void deleteAdsComment(@PathVariable("adId") Integer adId,
                                  @PathVariable("commentId") Integer commentId) {
+        commentService.deleteComment(adId, commentId);
     }
 
     @PatchMapping("/{adId}/comments/{commentId}/")
-    public ResponseEntity<CommentDto> editAdsComment(@PathVariable("adId") String adId,
+    public ResponseEntity<CommentDto> editAdsComment(@PathVariable("adId") Integer adId,
                                                      @PathVariable("commentId") Integer commentId,
-                                                     @RequestBody CommentDto Comment) {
-        return ResponseEntity.ok(new CommentDto());
+                                                     @RequestBody CommentDto comment) {
+        return ResponseEntity.ok(commentService.editComment(adId, commentId, comment));
     }
 }

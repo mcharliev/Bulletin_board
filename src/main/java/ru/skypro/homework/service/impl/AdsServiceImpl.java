@@ -8,9 +8,9 @@ import ru.skypro.homework.model.dto.CreateAdsDto;
 import ru.skypro.homework.model.dto.FullAdsDto;
 import ru.skypro.homework.model.dto.ResponseWrapperAdsDto;
 import ru.skypro.homework.model.entity.AdsEntity;
+import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.UserService;
 
@@ -31,8 +31,11 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsDto createAds(CreateAdsDto createAds) {
+    public AdsDto createAds(CreateAdsDto createAds,
+                            Authentication authentication) {
+        UserEntity user = userService.getUserEntity(authentication);
         AdsEntity adsEntity = adsMapper.createAdsDtoToAdsEntity(createAds);
+        adsEntity.setAuthor(user);
         adsRepository.save(adsEntity);
         return adsMapper.adsEntityToAdsDto(adsEntity);
     }
@@ -63,6 +66,17 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseWrapperAdsDto getAllMyAds(Authentication authentication) {
-        return null;
+        Integer authorId = userService.getUserEntity(authentication).getId();
+        List<AdsEntity> adsEntityList = adsRepository.findAdsEntitiesByAuthorId(authorId);
+        List<AdsDto> adsDtoList = adsMapper.toDtoList(adsEntityList);
+        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+        responseWrapperAdsDto.setCount(adsDtoList.size());
+        responseWrapperAdsDto.setResults(adsDtoList);
+        return responseWrapperAdsDto;
+    }
+
+    @Override
+    public AdsEntity getAdsEntity(Integer adsId) {
+        return adsRepository.findById(adsId).get();
     }
 }

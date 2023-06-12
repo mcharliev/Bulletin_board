@@ -48,7 +48,6 @@ public interface AdsMapper {
     List<AdsDto> toDtoList(Collection<AdsEntity> adsEntitiesList);
 
 
-
     @Mapping(target = "author", ignore = true)
-    void editAdsEntity(AdsDto adsDto,@MappingTarget AdsEntity ads);
+    void editAdsEntity(AdsDto adsDto, @MappingTarget AdsEntity ads);
 }
