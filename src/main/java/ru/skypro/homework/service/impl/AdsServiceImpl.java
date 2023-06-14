@@ -3,6 +3,7 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.exception.AdsNotFoundException;
 import ru.skypro.homework.model.dto.AdsDto;
 import ru.skypro.homework.model.dto.CreateAdsDto;
 import ru.skypro.homework.model.dto.FullAdsDto;
@@ -20,14 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
-
     private final AdsMapper adsMapper;
     private final UserService userService;
 
     public FullAdsDto getFullAdsById(Integer id) {
-        AdsEntity adsEntity = adsRepository.findById(id).get();
-        FullAdsDto fullAdsDto = adsMapper.adsEntityToFullAdsDto(adsEntity);
-        return fullAdsDto;
+        AdsEntity adsEntity = adsRepository.findById(id)
+                .orElseThrow(AdsNotFoundException::new);
+        return adsMapper.adsEntityToFullAdsDto(adsEntity);
     }
 
     @Override
@@ -42,23 +42,27 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public void delete(Integer id) {
-        AdsEntity adsEntity = adsRepository.findById(id).get();
+        AdsEntity adsEntity = adsRepository.findById(id)
+                .orElseThrow(AdsNotFoundException::new);
         adsRepository.delete(adsEntity);
     }
 
     @Override
-    public ResponseWrapperAdsDto getAllAds() {
-        List<AdsEntity> adsEntityList = adsRepository.findAll();
+    public ResponseWrapperAdsDto getAllAds(String title) {
+        List<AdsEntity> adsEntityList;
+        if (title == null) {
+            adsEntityList = adsRepository.findAll();
+        } else {
+            adsEntityList = adsRepository.findByTitleContainingIgnoreCaseOrderByTitle(title);
+        }
         List<AdsDto> adsDtoList = adsMapper.toDtoList(adsEntityList);
-        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
-        responseWrapperAdsDto.setCount(adsDtoList.size());
-        responseWrapperAdsDto.setResults(adsDtoList);
-        return responseWrapperAdsDto;
+        return createResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
     @Override
     public CreateAdsDto editAds(Integer id, AdsDto adsDto) {
-        AdsEntity adsEntity = adsRepository.findById(id).get();
+        AdsEntity adsEntity = adsRepository.findById(id)
+                .orElseThrow(AdsNotFoundException::new);
         adsMapper.editAdsEntity(adsDto, adsEntity);
         adsRepository.save(adsEntity);
         return adsMapper.adsEntityToCreateAdsDto(adsEntity);
@@ -69,14 +73,18 @@ public class AdsServiceImpl implements AdsService {
         Integer authorId = userService.getUserEntity(authentication).getId();
         List<AdsEntity> adsEntityList = adsRepository.findAdsEntitiesByAuthorId(authorId);
         List<AdsDto> adsDtoList = adsMapper.toDtoList(adsEntityList);
-        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
-        responseWrapperAdsDto.setCount(adsDtoList.size());
-        responseWrapperAdsDto.setResults(adsDtoList);
-        return responseWrapperAdsDto;
+        return createResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
     @Override
     public AdsEntity getAdsEntity(Integer adsId) {
-        return adsRepository.findById(adsId).get();
+        return adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
+    }
+
+    private ResponseWrapperAdsDto createResponseWrapperAdsDto(Integer count, List<AdsDto> adsDtoList) {
+        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+        responseWrapperAdsDto.setCount(count);
+        responseWrapperAdsDto.setResults(adsDtoList);
+        return responseWrapperAdsDto;
     }
 }

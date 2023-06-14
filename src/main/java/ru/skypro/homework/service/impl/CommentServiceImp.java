@@ -1,9 +1,9 @@
 package ru.skypro.homework.service.impl;
 
-import liquibase.pro.packaged.R;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.model.dto.CommentDto;
 import ru.skypro.homework.model.dto.ResponseWrapperCommentDto;
 import ru.skypro.homework.model.entity.AdsEntity;
@@ -52,13 +52,16 @@ public class CommentServiceImp implements CommentService {
     @Transactional
     @Override
     public void deleteComment(Integer adId, Integer commentId) {
-        commentRepository.deleteByAdsIdAndId(adId, commentId);
+        CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
+                .orElseThrow(CommentNotFoundException::new);
+        commentRepository.delete(commentEntity);
     }
 
     @Override
     public CommentDto editComment(Integer adId, Integer commentId, CommentDto comment) {
         String text = comment.getText();
-        CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId);
+        CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
+                .orElseThrow(CommentNotFoundException::new);
         commentEntity.setText(text);
         commentEntity.setLocalDateTime(LocalDateTime.now());
         commentRepository.save(commentEntity);

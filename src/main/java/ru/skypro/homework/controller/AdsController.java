@@ -19,8 +19,8 @@ public class AdsController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
-        return ResponseEntity.ok(adsService.getAllAds());
+    public ResponseEntity<ResponseWrapperAdsDto> getAllAds(@RequestParam(required = false)String title) {
+        return ResponseEntity.ok(adsService.getAllAds(title));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

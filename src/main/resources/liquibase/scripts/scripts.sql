@@ -9,50 +9,46 @@ create table user_info
     password   varchar(255),
     role       varchar(255),
     last_name  varchar(255),
-    phone      varchar(255)
+    phone      varchar(255),
+    avatar_id int
 );
 
 create table IF NOT EXISTS ads_info
 (
     id
-    serial
-    primary
-    key,
+              serial
+        primary
+            key,
     description
-    varchar
-(
-    255
-),
-    image varchar
-(
-    255
-),
-    price integer,
-    title varchar
-(
-    255
-),
+              varchar(255),
+    image     varchar(255),
+    price     integer,
+    title     varchar(255),
     author_id integer
-    );
+);
 
 
 create table IF NOT EXISTS comment_info
 (
     id
-    serial
-    primary
-    key,
+              serial
+        primary
+            key,
     created_at
-    timestamp,
+              timestamp,
     text
-    varchar
-(
-    255
-),
-    ads_id integer,
+              varchar(255),
+    ads_id    integer,
     author_id integer
-    );
+);
 
+create table image_info
+(
+    id         serial primary key,
+    data       oid,
+    file_size  bigint,
+    media_type varchar(255)
+);
 
 
 

@@ -11,6 +11,8 @@ import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
 import ru.skypro.homework.service.UserService;
 
+import java.io.IOException;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
@@ -36,8 +38,13 @@ public class UserController {
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(@RequestParam MultipartFile image) {
-        return ResponseEntity.ok("File uploaded successfully");
+    public ResponseEntity<String> uploadImage(@RequestParam MultipartFile image,
+                                              Authentication authentication) {
+        try {
+            return ResponseEntity.ok(userService.uploadUserImage(image,authentication));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

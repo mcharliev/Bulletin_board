@@ -14,7 +14,7 @@ public interface AdsService {
 
     void delete(Integer id);
 
-    ResponseWrapperAdsDto getAllAds();
+    ResponseWrapperAdsDto getAllAds(String title);
 
     CreateAdsDto editAds(Integer id, AdsDto adsDto);
 

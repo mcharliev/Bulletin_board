@@ -29,12 +29,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReqDto req) {
-        UserEntity userEntity = userMapper.loginReqDtoToUserEntity(req);
-        userEntity.setFirstName("Merdan");
-        userEntity.setLastName("Charliev");
-        userEntity.setPhone("915");
-        userRepository.save(userEntity);
-
         if (authService.login(req.getUsername(), req.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -45,6 +39,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterReqDto req) {
         Role role = req.getRole() == null ? USER : req.getRole();
+        UserEntity userEntity = userMapper.registerReqDtoToUserEntity(req);
+        userRepository.save(userEntity);
         if (authService.register(req, role)) {
             return ResponseEntity.ok().build();
         } else {

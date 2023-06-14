@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface AdsRepository extends JpaRepository<AdsEntity, Integer> {
     List<AdsEntity> findAdsEntitiesByAuthorId(Integer authorId);
+
+    List<AdsEntity> findByTitleContainingIgnoreCaseOrderByTitle(String title);
 }
