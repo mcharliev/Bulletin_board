@@ -1,6 +1,6 @@
 package ru.skypro.homework.exception;
 
-public class ErrorDetails {
+public class NotFoundDetails {
     private String message;
 
     public String getMessage() {

@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class ImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
     @Column(name = "file_size")
     private Long fileSize;

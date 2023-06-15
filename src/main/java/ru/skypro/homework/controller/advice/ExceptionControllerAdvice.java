@@ -9,27 +9,27 @@ import ru.skypro.homework.exception.*;
 public class ExceptionControllerAdvice {
 
     @ExceptionHandler(AdsNotFoundException.class)
-    public ResponseEntity<ErrorDetails> exceptionAdsNotFoundHandler() {
-        ErrorDetails errorDetails = new ErrorDetails();
-        errorDetails.setMessage("Ads not found!");
+    public ResponseEntity<NotFoundDetails> exceptionAdsNotFoundHandler() {
+        NotFoundDetails notFoundDetails = new NotFoundDetails();
+        notFoundDetails.setMessage("Ads not found!");
         return ResponseEntity
                 .badRequest()
-                .body(errorDetails);
+                .body(notFoundDetails);
     }
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorDetails> exceptionUserNotFoundHandler() {
-        ErrorDetails errorDetails = new ErrorDetails();
-        errorDetails.setMessage("User not found!");
+    public ResponseEntity<NotFoundDetails> exceptionUserNotFoundHandler() {
+        NotFoundDetails notFoundDetails = new NotFoundDetails();
+        notFoundDetails.setMessage("User not found!");
         return ResponseEntity
                 .badRequest()
-                .body(errorDetails);
+                .body(notFoundDetails);
     }
     @ExceptionHandler(CommentNotFoundException.class)
-    public ResponseEntity<ErrorDetails> exceptionCommentNotFoundHandler() {
-        ErrorDetails errorDetails = new ErrorDetails();
-        errorDetails.setMessage("Comment not found!");
+    public ResponseEntity<NotFoundDetails> exceptionCommentNotFoundHandler() {
+        NotFoundDetails notFoundDetails = new NotFoundDetails();
+        notFoundDetails.setMessage("Comment not found!");
         return ResponseEntity
                 .badRequest()
-                .body(errorDetails);
+                .body(notFoundDetails);
     }
 }

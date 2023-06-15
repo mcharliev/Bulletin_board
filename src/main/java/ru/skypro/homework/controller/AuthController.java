@@ -39,6 +39,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterReqDto req) {
         Role role = req.getRole() == null ? USER : req.getRole();
+        req.setRole(role);
         UserEntity userEntity = userMapper.registerReqDtoToUserEntity(req);
         userRepository.save(userEntity);
         if (authService.register(req, role)) {

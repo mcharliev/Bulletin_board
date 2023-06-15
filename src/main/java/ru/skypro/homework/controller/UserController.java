@@ -37,11 +37,10 @@ public class UserController {
         return ResponseEntity.ok(userService.setPassword(newPassword,authentication));
     }
 
-    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(@RequestParam MultipartFile image,
-                                              Authentication authentication) {
+    @PostMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadImage(@RequestBody MultipartFile image) {
         try {
-            return ResponseEntity.ok(userService.uploadUserImage(image,authentication));
+            return ResponseEntity.ok(userService.uploadUserImage(image,null));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
