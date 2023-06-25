@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.UserNotFoundException;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ImageService imageService;
+    private final PasswordEncoder encoder;
 
 
     @Override
@@ -49,10 +51,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto, Authentication authentication) {
-//        UserEntity userEntity = userRepository.findByEmail(authentication.getName()).get();
-//        userEntity.setPassword(newPasswordDto.getNewPassword());
-//        userRepository.save(userEntity);
-        return null;
+        UserEntity userEntity = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(UserNotFoundException::new);
+        userEntity.setPassword(encoder.encode(newPasswordDto.getNewPassword()));
+        userRepository.save(userEntity);
+        NewPasswordDto dto = new NewPasswordDto();
+        dto.setCurrentPassword(userEntity.getPassword());
+        dto.setNewPassword(newPasswordDto.getNewPassword());
+        return dto;
     }
 
     @Override
