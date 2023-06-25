@@ -3,9 +3,11 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.exception.AccessDeniedException;
 import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.model.dto.CommentDto;
 import ru.skypro.homework.model.dto.ResponseWrapperCommentDto;
+import ru.skypro.homework.model.dto.Role;
 import ru.skypro.homework.model.entity.AdsEntity;
 import ru.skypro.homework.model.entity.CommentEntity;
 import ru.skypro.homework.model.entity.UserEntity;
@@ -49,22 +51,40 @@ public class CommentServiceImp implements CommentService {
         return responseWrapperCommentDto;
     }
 
-    @Transactional
+
     @Override
-    public void deleteComment(Integer adId, Integer commentId) {
-        CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
-                .orElseThrow(CommentNotFoundException::new);
-        commentRepository.delete(commentEntity);
+    public void deleteComment(Integer adId, Integer commentId, Authentication authentication) {
+        if (checkRights(commentId, authentication)) {
+            CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
+                    .orElseThrow(CommentNotFoundException::new);
+            commentRepository.delete(commentEntity);
+        } else {
+            throw new AccessDeniedException();
+        }
     }
 
     @Override
-    public CommentDto editComment(Integer adId, Integer commentId, CommentDto comment) {
-        String text = comment.getText();
-        CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
-                .orElseThrow(CommentNotFoundException::new);
-        commentEntity.setText(text);
-        commentEntity.setLocalDateTime(LocalDateTime.now());
-        commentRepository.save(commentEntity);
-        return commentMapper.commentEntityToCommentDto(commentEntity);
+    public CommentDto editComment(Integer adId, Integer commentId, CommentDto comment, Authentication authentication) {
+        if (checkRights(commentId, authentication)) {
+            String text = comment.getText();
+            CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
+                    .orElseThrow(CommentNotFoundException::new);
+            commentEntity.setText(text);
+            commentEntity.setLocalDateTime(LocalDateTime.now());
+            commentRepository.save(commentEntity);
+            return commentMapper.commentEntityToCommentDto(commentEntity);
+        } else {
+            throw new AccessDeniedException();
+        }
+    }
+
+
+    private boolean checkRights(Integer id, Authentication authentication) {
+        CommentEntity commentEntity = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
+        UserEntity currentUser = userService.getUserEntity(authentication);
+        String authorCommentLogin = commentEntity.getAuthor().getEmail();
+        Role currentUserRole = currentUser.getRole();
+        String currentUserLogin = authentication.getName();
+        return authorCommentLogin.equals(currentUserLogin) || currentUserRole == Role.ADMIN;
     }
 }

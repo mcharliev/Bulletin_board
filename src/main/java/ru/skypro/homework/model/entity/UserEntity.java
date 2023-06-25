@@ -1,16 +1,13 @@
 package ru.skypro.homework.model.entity;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.springframework.stereotype.Component;
 import ru.skypro.homework.model.dto.Role;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @ToString
 @Entity
 @EqualsAndHashCode

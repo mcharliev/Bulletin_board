@@ -9,7 +9,7 @@ public interface CommentService {
 
     ResponseWrapperCommentDto getAllAdsComment(Integer id);
 
-    void deleteComment(Integer adId, Integer commentId);
+    void deleteComment(Integer adId, Integer commentId,Authentication authentication);
 
-    CommentDto editComment(Integer adId, Integer commentId, CommentDto comment);
+    CommentDto editComment(Integer adId, Integer commentId, CommentDto comment,Authentication authentication);
 }

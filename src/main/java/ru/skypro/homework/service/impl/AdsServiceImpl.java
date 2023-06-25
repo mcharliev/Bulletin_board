@@ -3,11 +3,9 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.exception.AccessDeniedException;
 import ru.skypro.homework.exception.AdsNotFoundException;
-import ru.skypro.homework.model.dto.AdsDto;
-import ru.skypro.homework.model.dto.CreateAdsDto;
-import ru.skypro.homework.model.dto.FullAdsDto;
-import ru.skypro.homework.model.dto.ResponseWrapperAdsDto;
+import ru.skypro.homework.model.dto.*;
 import ru.skypro.homework.model.entity.AdsEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.AdsMapper;
@@ -41,10 +39,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public void delete(Integer id) {
-        AdsEntity adsEntity = adsRepository.findById(id)
-                .orElseThrow(AdsNotFoundException::new);
-        adsRepository.delete(adsEntity);
+    public void delete(Integer id, Authentication authentication) {
+        if (checkRights(id, authentication)) {
+            AdsEntity adsEntity = adsRepository.findById(id)
+                    .orElseThrow(AdsNotFoundException::new);
+            adsRepository.delete(adsEntity);
+        } else {
+            throw new AccessDeniedException();
+        }
     }
 
     @Override
@@ -60,12 +62,16 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public CreateAdsDto editAds(Integer id, AdsDto adsDto) {
-        AdsEntity adsEntity = adsRepository.findById(id)
-                .orElseThrow(AdsNotFoundException::new);
-        adsMapper.editAdsEntity(adsDto, adsEntity);
-        adsRepository.save(adsEntity);
-        return adsMapper.adsEntityToCreateAdsDto(adsEntity);
+    public CreateAdsDto editAds(Integer id, AdsDto adsDto, Authentication authentication) {
+        if (checkRights(id, authentication)) {
+            AdsEntity adsEntity = adsRepository.findById(id)
+                    .orElseThrow(AdsNotFoundException::new);
+            adsMapper.editAdsEntity(adsDto, adsEntity);
+            adsRepository.save(adsEntity);
+            return adsMapper.adsEntityToCreateAdsDto(adsEntity);
+        } else {
+            throw new AccessDeniedException();
+        }
     }
 
     @Override
@@ -86,5 +92,14 @@ public class AdsServiceImpl implements AdsService {
         responseWrapperAdsDto.setCount(count);
         responseWrapperAdsDto.setResults(adsDtoList);
         return responseWrapperAdsDto;
+    }
+
+    private boolean checkRights(Integer id, Authentication authentication) {
+        AdsEntity adsEntity = adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
+        UserEntity currentUser = userService.getUserEntity(authentication);
+        String authorAdsLogin = adsEntity.getAuthor().getEmail();
+        Role currentUserRole = currentUser.getRole();
+        String currentUserLogin = authentication.getName();
+        return authorAdsLogin.equals(currentUserLogin) || currentUserRole == Role.ADMIN;
     }
 }

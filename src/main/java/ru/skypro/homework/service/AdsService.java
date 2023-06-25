@@ -12,11 +12,11 @@ public interface AdsService {
 
     AdsDto createAds(CreateAdsDto createAds,Authentication authentication);
 
-    void delete(Integer id);
+    void delete(Integer id,Authentication authentication);
 
     ResponseWrapperAdsDto getAllAds(String title);
 
-    CreateAdsDto editAds(Integer id, AdsDto adsDto);
+    CreateAdsDto editAds(Integer id, AdsDto adsDto,Authentication authentication);
 
     ResponseWrapperAdsDto getAllMyAds(Authentication authentication);
 

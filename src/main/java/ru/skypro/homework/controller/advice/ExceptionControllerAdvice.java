@@ -32,4 +32,12 @@ public class ExceptionControllerAdvice {
                 .badRequest()
                 .body(notFoundDetails);
     }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<NotFoundDetails> exceptionAccessDeniedHandler() {
+        NotFoundDetails notFoundDetails = new NotFoundDetails();
+        notFoundDetails.setMessage("Not enough right");
+        return ResponseEntity
+                .badRequest()
+                .body(notFoundDetails);
+    }
 }

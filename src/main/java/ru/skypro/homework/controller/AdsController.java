@@ -37,14 +37,16 @@ public class AdsController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAds(@PathVariable Integer id) {
-        adsService.delete(id);
+    public void deleteAds(@PathVariable Integer id,
+                          Authentication authentication) {
+        adsService.delete(id,authentication);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CreateAdsDto> updateAds(@PathVariable Integer id,
-                                                  @RequestBody AdsDto ads) {
-        return ResponseEntity.ok(adsService.editAds(id, ads));
+                                                  @RequestBody AdsDto ads,
+                                                  Authentication authentication) {
+        return ResponseEntity.ok(adsService.editAds(id, ads,authentication));
     }
 
     @GetMapping("/me")
@@ -70,16 +72,18 @@ public class AdsController {
         return ResponseEntity.ok(commentService.createComment(id, comment, authentication));
     }
 
-    @DeleteMapping("/{adId}/comments/{commentId}/")
+    @DeleteMapping("/{adId}/comments/{commentId}")
     public void deleteAdsComment(@PathVariable("adId") Integer adId,
-                                 @PathVariable("commentId") Integer commentId) {
-        commentService.deleteComment(adId, commentId);
+                                 @PathVariable("commentId") Integer commentId,
+                                 Authentication authentication) {
+        commentService.deleteComment(adId, commentId,authentication);
     }
 
-    @PatchMapping("/{adId}/comments/{commentId}/")
+    @PatchMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<CommentDto> editAdsComment(@PathVariable("adId") Integer adId,
                                                      @PathVariable("commentId") Integer commentId,
-                                                     @RequestBody CommentDto comment) {
-        return ResponseEntity.ok(commentService.editComment(adId, commentId, comment));
+                                                     @RequestBody CommentDto comment,
+                                                     Authentication authentication) {
+        return ResponseEntity.ok(commentService.editComment(adId, commentId, comment,authentication));
     }
 }

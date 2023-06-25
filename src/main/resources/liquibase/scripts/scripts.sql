@@ -15,12 +15,8 @@ create table user_info
 
 create table IF NOT EXISTS ads_info
 (
-    id
-              serial
-        primary
-            key,
-    description
-              varchar(255),
+    id serial primary key,
+    description varchar(255),
     image     varchar(255),
     price     integer,
     title     varchar(255),
