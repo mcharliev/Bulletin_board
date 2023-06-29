@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.exception.ChangePasswordException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
@@ -53,12 +54,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto, Authentication authentication) {
         UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
-        userEntity.setPassword(encoder.encode(newPasswordDto.getNewPassword()));
-        userRepository.save(userEntity);
-        NewPasswordDto dto = new NewPasswordDto();
-        dto.setCurrentPassword(userEntity.getPassword());
-        dto.setNewPassword(newPasswordDto.getNewPassword());
-        return dto;
+
+        if (encoder.matches(userEntity.getPassword(),newPasswordDto.getCurrentPassword())){
+            userEntity.setPassword(encoder.encode(newPasswordDto.getNewPassword()));
+            userRepository.save(userEntity);
+            NewPasswordDto dto = new NewPasswordDto();
+            dto.setCurrentPassword(userEntity.getPassword());
+            dto.setNewPassword(newPasswordDto.getNewPassword());
+            return dto;
+        }else {
+            throw new ChangePasswordException();
+        }
     }
 
     @Override
