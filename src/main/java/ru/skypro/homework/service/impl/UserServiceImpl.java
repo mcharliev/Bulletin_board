@@ -9,9 +9,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.ChangePasswordException;
+import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
+import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
@@ -19,7 +21,6 @@ import ru.skypro.homework.security.UserEntityDetails;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -47,7 +48,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         String email = authentication.getName();
         UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
-        return userMapper.userEntityToUserDto(userEntity);
+        UserDto userDto = userMapper.userEntityToUserDto(userEntity);
+        userDto.setImage(String.format("/users/%s/image", userEntity.getImage()));
+        return userDto;
     }
 
     @Override
@@ -55,14 +58,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
 
-        if (encoder.matches(userEntity.getPassword(),newPasswordDto.getCurrentPassword())){
+        if (encoder.matches(userEntity.getPassword(), newPasswordDto.getCurrentPassword())) {
             userEntity.setPassword(encoder.encode(newPasswordDto.getNewPassword()));
             userRepository.save(userEntity);
             NewPasswordDto dto = new NewPasswordDto();
             dto.setCurrentPassword(userEntity.getPassword());
             dto.setNewPassword(newPasswordDto.getNewPassword());
             return dto;
-        }else {
+        } else {
             throw new ChangePasswordException();
         }
     }
@@ -73,20 +76,30 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 
-    @Transactional
-    @Override
-    public String uploadUserImage(MultipartFile image, Authentication authentication) {
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(UserNotFoundException::new);
-        user.setAvatar(imageService.updateUserImage(image));
-        return "OK";
-    }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserEntity> optUserEntity = userRepository.findByEmail(username);
-        if (optUserEntity.isEmpty()){
-            throw new UsernameNotFoundException(String.format("User '%s' not found",username));
+        if (optUserEntity.isEmpty()) {
+            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
         return new UserEntityDetails(optUserEntity.get());
+    }
+
+    public String updateUserImage(MultipartFile image, Authentication authentication) {
+        UserEntity userEntity = getUserEntity(authentication);
+        String currentImageLink = userEntity.getImage();
+        if (currentImageLink == null) {
+            ImageEntity newImage = imageService.saveImage(image);
+            userEntity.setImage(newImage.getId());
+            userRepository.saveAndFlush(userEntity);
+            return "image uploaded successfully";
+        } else {
+            ImageEntity oldImage = imageService.findImageEntityById(userEntity.getImage())
+                    .orElseThrow(ImageNotFoundException::new);
+            ImageEntity updatedImage = imageService.updateImage(image, oldImage);
+            userEntity.setImage(updatedImage.getId());
+            userRepository.saveAndFlush(userEntity);
+            return "image uploaded successfully";
+        }
     }
 }

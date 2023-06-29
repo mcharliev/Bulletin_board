@@ -10,5 +10,5 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
     List<CommentEntity> findAllByAdsId(Integer id);
 
    Optional<CommentEntity> findByAdsIdAndId(Integer adId, Integer commentId);
-//   Optional<CommentEntity> findById(Integer id);
+
 }

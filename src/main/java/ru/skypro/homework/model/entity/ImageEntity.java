@@ -1,33 +1,22 @@
 package ru.skypro.homework.model.entity;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
-@Getter
-@Setter
+@Data
 @ToString
 @Entity
 @EqualsAndHashCode
 @Table(name = "image_info")
 public class ImageEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name = "file_size")
-    private Long fileSize;
-
-    @Column(name = "media_type")
-    private String mediaType;
-
+    private String id;
     @Lob
-    @Column(name = "data")
+    @Column(name = "image")
+    @Type(type = "org.hibernate.type.BinaryType")
     private byte[] data;
 
-    @OneToOne(mappedBy = "avatar")
-    private UserEntity user;
 }

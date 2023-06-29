@@ -9,8 +9,7 @@ create table user_info
     password   varchar(255),
     role       varchar(255),
     last_name  varchar(255),
-    phone      varchar(255),
-    avatar_id int
+    phone      varchar(255)
 );
 
 create table IF NOT EXISTS ads_info
@@ -26,24 +25,17 @@ create table IF NOT EXISTS ads_info
 
 create table IF NOT EXISTS comment_info
 (
-    id
-              serial
-        primary
-            key,
-    created_at
-              timestamp,
-    text
-              varchar(255),
+    id serial  primary key,
+    created_at timestamp,
+    text varchar(255),
     ads_id    integer,
     author_id integer
 );
 
 create table image_info
 (
-    id         serial primary key,
-    data       oid,
-    file_size  bigint,
-    media_type varchar(255)
+    id         varchar(255) primary key,
+    image      bytea
 );
 
 

@@ -19,5 +19,5 @@ public interface UserService {
 
     UserEntity getUserEntity(Authentication authentication);
 
-    String uploadUserImage(MultipartFile image,Authentication authentication) throws IOException;
+    String updateUserImage(MultipartFile image,Authentication authentication) throws IOException;
 }

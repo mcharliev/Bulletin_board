@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
+import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @CrossOrigin(value = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
+    private final ImageService imageService;
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto,
@@ -37,13 +39,19 @@ public class UserController {
         return ResponseEntity.ok(userService.setPassword(newPassword,authentication));
     }
 
-    @PostMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(@RequestBody MultipartFile image) {
+    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadImage(@RequestPart MultipartFile image,
+                                              Authentication authentication) {
         try {
-            return ResponseEntity.ok(userService.uploadUserImage(image,null));
+            return ResponseEntity.ok(userService.updateUserImage(image,authentication));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
+        return ResponseEntity.ok(imageService.getImageById(id));
     }
 }
 

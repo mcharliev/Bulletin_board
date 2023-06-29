@@ -48,4 +48,12 @@ public class ExceptionControllerAdvice {
                 .badRequest()
                 .body(notFoundDetails);
     }
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<ExceptionDetails> ImageNotFoundHandler() {
+        ExceptionDetails notFoundDetails = new ExceptionDetails();
+        notFoundDetails.setMessage("image not found");
+        return ResponseEntity
+                .badRequest()
+                .body(notFoundDetails);
+    }
 }

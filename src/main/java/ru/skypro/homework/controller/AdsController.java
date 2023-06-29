@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.*;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.ImageService;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,6 +18,7 @@ import ru.skypro.homework.service.CommentService;
 public class AdsController {
     private final AdsService adsService;
     private final CommentService commentService;
+    private final ImageService imageService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds(@RequestParam(required = false)String title) {
@@ -28,7 +30,7 @@ public class AdsController {
             @RequestPart("image") MultipartFile file,
             @RequestPart("properties") CreateAdsDto createAds,
             Authentication authentication) {
-        return ResponseEntity.ok(adsService.createAds(createAds, authentication));
+        return ResponseEntity.ok(adsService.createAds(createAds,file, authentication));
     }
 
     @GetMapping("/{id}")
@@ -57,7 +59,7 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadAdsImage(@PathVariable Integer id,
                                                  @RequestParam MultipartFile image) {
-        return ResponseEntity.ok("File uploaded successfully");
+        return ResponseEntity.ok(adsService.updateAdsImage(id,image));
     }
 
     @GetMapping("/{id}/comments")
@@ -85,5 +87,10 @@ public class AdsController {
                                                      @RequestBody CommentDto comment,
                                                      Authentication authentication) {
         return ResponseEntity.ok(commentService.editComment(adId, commentId, comment,authentication));
+    }
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
+        return ResponseEntity.ok(imageService.getImageById(id));
     }
 }

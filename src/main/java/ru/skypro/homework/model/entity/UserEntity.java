@@ -45,8 +45,4 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "author")
     private List<AdsEntity> ads;
-
-    @OneToOne
-    @JoinColumn(name = "avatar_id")
-    private ImageEntity avatar;
 }
