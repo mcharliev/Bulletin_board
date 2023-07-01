@@ -49,7 +49,9 @@ public class UserController {
         }
     }
 
-    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/{id}/image", produces = {MediaType.IMAGE_PNG_VALUE,
+                                                      MediaType.IMAGE_JPEG_VALUE,
+                                                      MediaType.IMAGE_GIF_VALUE})
     public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
         return ResponseEntity.ok(imageService.getImageById(id));
     }

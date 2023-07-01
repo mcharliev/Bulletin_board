@@ -10,8 +10,10 @@ import ru.skypro.homework.model.entity.UserEntity;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @Mapping(target = "image", ignore = true)
     UserDto userEntityToUserDto(UserEntity entity);
 
+    @Mapping(target = "image", ignore = true)
     UserEntity userDtoToUserEntity(UserDto dto);
 
     @Mapping(target = "email",source = "username")

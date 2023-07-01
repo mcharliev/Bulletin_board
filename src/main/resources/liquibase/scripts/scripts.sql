@@ -5,21 +5,21 @@ create table user_info
     id         serial primary key,
     email      varchar(255),
     first_name varchar(255),
-    image      varchar(255),
     password   varchar(255),
     role       varchar(255),
     last_name  varchar(255),
-    phone      varchar(255)
+    phone      varchar(255),
+    image_id   varchar(255)
 );
 
 create table IF NOT EXISTS ads_info
 (
     id serial primary key,
     description varchar(255),
-    image     varchar(255),
-    price     integer,
-    title     varchar(255),
-    author_id integer
+    price      integer,
+    title      varchar(255),
+    author_id  integer,
+    image_id   varchar(255)
 );
 
 

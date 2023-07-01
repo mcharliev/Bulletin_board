@@ -21,7 +21,7 @@ public class AdsController {
     private final ImageService imageService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapperAdsDto> getAllAds(@RequestParam(required = false)String title) {
+    public ResponseEntity<ResponseWrapperAdsDto> getAllAds(@RequestParam(required = false) String title) {
         return ResponseEntity.ok(adsService.getAllAds(title));
     }
 
@@ -30,7 +30,7 @@ public class AdsController {
             @RequestPart("image") MultipartFile file,
             @RequestPart("properties") CreateAdsDto createAds,
             Authentication authentication) {
-        return ResponseEntity.ok(adsService.createAds(createAds,file, authentication));
+        return ResponseEntity.ok(adsService.createAds(createAds, file, authentication));
     }
 
     @GetMapping("/{id}")
@@ -41,14 +41,14 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public void deleteAds(@PathVariable Integer id,
                           Authentication authentication) {
-        adsService.delete(id,authentication);
+        adsService.delete(id, authentication);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CreateAdsDto> updateAds(@PathVariable Integer id,
                                                   @RequestBody AdsDto ads,
                                                   Authentication authentication) {
-        return ResponseEntity.ok(adsService.editAds(id, ads,authentication));
+        return ResponseEntity.ok(adsService.editAds(id, ads, authentication));
     }
 
     @GetMapping("/me")
@@ -59,7 +59,7 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadAdsImage(@PathVariable Integer id,
                                                  @RequestParam MultipartFile image) {
-        return ResponseEntity.ok(adsService.updateAdsImage(id,image));
+        return ResponseEntity.ok(adsService.updateAdsImage(id, image));
     }
 
     @GetMapping("/{id}/comments")
@@ -78,7 +78,7 @@ public class AdsController {
     public void deleteAdsComment(@PathVariable("adId") Integer adId,
                                  @PathVariable("commentId") Integer commentId,
                                  Authentication authentication) {
-        commentService.deleteComment(adId, commentId,authentication);
+        commentService.deleteComment(adId, commentId, authentication);
     }
 
     @PatchMapping("/{adId}/comments/{commentId}")
@@ -86,10 +86,12 @@ public class AdsController {
                                                      @PathVariable("commentId") Integer commentId,
                                                      @RequestBody CommentDto comment,
                                                      Authentication authentication) {
-        return ResponseEntity.ok(commentService.editComment(adId, commentId, comment,authentication));
+        return ResponseEntity.ok(commentService.editComment(adId, commentId, comment, authentication));
     }
 
-    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/{id}/image", produces = {MediaType.IMAGE_PNG_VALUE,
+                                                      MediaType.IMAGE_JPEG_VALUE,
+                                                      MediaType.IMAGE_GIF_VALUE, "image/*"})
     public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
         return ResponseEntity.ok(imageService.getImageById(id));
     }

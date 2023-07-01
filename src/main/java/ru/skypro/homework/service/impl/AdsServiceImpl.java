@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.AccessDeniedException;
 import ru.skypro.homework.exception.AdsNotFoundException;
-import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.model.dto.*;
 import ru.skypro.homework.model.entity.AdsEntity;
 import ru.skypro.homework.model.entity.ImageEntity;
@@ -31,7 +30,7 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity adsEntity = adsRepository.findById(id)
                 .orElseThrow(AdsNotFoundException::new);
         FullAdsDto fullAdsDto = adsMapper.adsEntityToFullAdsDto(adsEntity);
-        fullAdsDto.setImage(String.format("/ads/%s/image", adsEntity.getImage()));
+        fullAdsDto.setImage(String.format("/ads/%s/image", adsEntity.getImage().getId()));
         return fullAdsDto;
     }
 
@@ -43,10 +42,10 @@ public class AdsServiceImpl implements AdsService {
         AdsEntity adsEntity = adsMapper.createAdsDtoToAdsEntity(createAds);
         ImageEntity imageEntity = imageService.saveImage(image);
         adsEntity.setAuthor(user);
-        adsEntity.setImage(imageEntity.getId());
+        adsEntity.setImage(imageEntity);
         adsRepository.save(adsEntity);
         AdsDto adsDto = adsMapper.adsEntityToAdsDto(adsEntity);
-        adsDto.setImage(String.format("/users/%s/image", adsEntity.getImage()));
+        adsDto.setImage(String.format("/users/%s/image", adsEntity.getImage().getId()));
         return adsDto;
     }
 
@@ -102,17 +101,15 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public String updateAdsImage(Integer id, MultipartFile image) {
         AdsEntity adsEntity = getAdsEntity(id);
-        String currentImageLink = adsEntity.getImage();
-        if (currentImageLink == null) {
+        ImageEntity oldImage = adsEntity.getImage();
+        if (oldImage == null) {
             ImageEntity newImage = imageService.saveImage(image);
-            adsEntity.setImage(newImage.getId());
+            adsEntity.setImage(newImage);
             adsRepository.saveAndFlush(adsEntity);
             return "image uploaded successfully";
         } else {
-            ImageEntity oldImage = imageService.findImageEntityById(adsEntity.getImage())
-                    .orElseThrow(ImageNotFoundException::new);
             ImageEntity updatedImage = imageService.updateImage(image, oldImage);
-            adsEntity.setImage(updatedImage.getId());
+            adsEntity.setImage(updatedImage);
             adsRepository.saveAndFlush(adsEntity);
             return "image uploaded successfully";
         }
@@ -138,7 +135,7 @@ public class AdsServiceImpl implements AdsService {
     private List<AdsDto> insertLinkToAdsDtoList(List<AdsEntity> adsEntityList) {
         List<AdsDto> adsDtoList = adsMapper.toDtoList(adsEntityList);
         for (int i = 0; i < adsDtoList.size(); i++) {
-            String imageList = String.format("/ads/%s/image", adsEntityList.get(i).getImage());
+            String imageList = String.format("/ads/%s/image", adsEntityList.get(i).getImage().getId());
             adsDtoList.get(i).setImage(imageList);
         }
         return adsDtoList;

@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.ChangePasswordException;
-import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.dto.NewPasswordDto;
 import ru.skypro.homework.model.dto.UserDto;
@@ -49,7 +48,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         UserDto userDto = userMapper.userEntityToUserDto(userEntity);
-        userDto.setImage(String.format("/users/%s/image", userEntity.getImage()));
+        ImageEntity imageEntity = userEntity.getImage();
+        if (imageEntity != null) {
+            userDto.setImage(String.format("/users/%s/image", userEntity.getImage().getId()));
+        }
         return userDto;
     }
 
@@ -87,17 +89,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     public String updateUserImage(MultipartFile image, Authentication authentication) {
         UserEntity userEntity = getUserEntity(authentication);
-        String currentImageLink = userEntity.getImage();
-        if (currentImageLink == null) {
+        ImageEntity oldImage = userEntity.getImage();
+        if (oldImage == null) {
             ImageEntity newImage = imageService.saveImage(image);
-            userEntity.setImage(newImage.getId());
+            userEntity.setImage(newImage);
             userRepository.saveAndFlush(userEntity);
             return "image uploaded successfully";
         } else {
-            ImageEntity oldImage = imageService.findImageEntityById(userEntity.getImage())
-                    .orElseThrow(ImageNotFoundException::new);
             ImageEntity updatedImage = imageService.updateImage(image, oldImage);
-            userEntity.setImage(updatedImage.getId());
+            userEntity.setImage(updatedImage);
             userRepository.saveAndFlush(userEntity);
             return "image uploaded successfully";
         }

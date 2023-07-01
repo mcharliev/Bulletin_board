@@ -10,6 +10,7 @@ import ru.skypro.homework.model.dto.ResponseWrapperCommentDto;
 import ru.skypro.homework.model.dto.Role;
 import ru.skypro.homework.model.entity.AdsEntity;
 import ru.skypro.homework.model.entity.CommentEntity;
+import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.CommentMapper;
 import ru.skypro.homework.repository.CommentRepository;
@@ -38,19 +39,23 @@ public class CommentServiceImp implements CommentService {
         commentEntity.setAuthor(userEntity);
         commentEntity.setLocalDateTime(LocalDateTime.now());
         commentRepository.save(commentEntity);
-        return commentMapper.commentEntityToCommentDto(commentEntity);
+        CommentDto dto = commentMapper.commentEntityToCommentDto(commentEntity);
+        ImageEntity imageEntity = commentEntity.getAuthor().getImage();
+        if (imageEntity != null) {
+            dto.setAuthorImage(String.format("/ads/%s/image", userEntity.getImage().getId()));
+        }
+        return dto;
     }
 
     @Override
     public ResponseWrapperCommentDto getAllAdsComment(Integer id) {
         AdsEntity adsEntity = adsService.getAdsEntity(id);
+
         List<CommentEntity> adsCommentsList = commentRepository.findAllByAdsId(adsEntity.getId());
-        ResponseWrapperCommentDto responseWrapperCommentDto = new ResponseWrapperCommentDto();
-        responseWrapperCommentDto.setCount(adsCommentsList.size());
-        responseWrapperCommentDto.setResults(commentMapper.toDtoList(adsCommentsList));
+
+        ResponseWrapperCommentDto responseWrapperCommentDto = createCommentDtoList(adsCommentsList);
         return responseWrapperCommentDto;
     }
-
 
     @Override
     public void deleteComment(Integer adId, Integer commentId, Authentication authentication) {
@@ -78,7 +83,6 @@ public class CommentServiceImp implements CommentService {
         }
     }
 
-
     private boolean checkRights(Integer id, Authentication authentication) {
         CommentEntity commentEntity = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
         UserEntity currentUser = userService.getUserEntity(authentication);
@@ -86,5 +90,24 @@ public class CommentServiceImp implements CommentService {
         Role currentUserRole = currentUser.getRole();
         String currentUserLogin = authentication.getName();
         return authorCommentLogin.equals(currentUserLogin) || currentUserRole == Role.ADMIN;
+    }
+
+    private ResponseWrapperCommentDto createCommentDtoList(List<CommentEntity> commentEntityList) {
+
+        List<CommentDto> commentDtoList = commentMapper.toDtoList(commentEntityList);
+
+        for (int i = 0; i < commentDtoList.size(); i++) {
+            ImageEntity imageEntity = commentEntityList.get(i).getAuthor().getImage();
+            if (imageEntity != null) {
+                String authorImageLink = String.format("/users/%s/image",
+                        commentEntityList.get(i).getAuthor().getImage().getId());
+                commentDtoList.get(i).setAuthorImage(authorImageLink);
+            }
+        }
+        ResponseWrapperCommentDto responseWrapperCommentDto = new ResponseWrapperCommentDto();
+        responseWrapperCommentDto.setCount(commentDtoList.size());
+        responseWrapperCommentDto.setResults(commentDtoList);
+
+        return responseWrapperCommentDto;
     }
 }

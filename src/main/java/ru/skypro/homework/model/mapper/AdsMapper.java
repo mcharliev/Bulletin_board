@@ -19,10 +19,12 @@ public interface AdsMapper {
 
     @Mapping(target = "id", source = "pk")
     @Mapping(target = "author", ignore = true)
+    @Mapping(target = "image", ignore = true)
     AdsEntity adsDtoToAdsEntity(AdsDto dto);
 
     @Mapping(target = "author", source = "author.id")
     @Mapping(target = "pk", source = "id")
+    @Mapping(target = "image", ignore = true)
     AdsDto adsEntityToAdsDto(AdsEntity entity);
 
     @Mapping(target = "pk", source = "id")
@@ -30,8 +32,9 @@ public interface AdsMapper {
     @Mapping(target = "authorLastName", source = "author.lastName")
     @Mapping(target = "phone", source = "author.phone")
     @Mapping(target = "email", source = "author.email")
+    @Mapping(target = "image", ignore = true)
     FullAdsDto adsEntityToFullAdsDto(AdsEntity adsEntity);
-
+    @Mapping(target = "image", ignore = true)
     FullAdsDto toFullAdsDto(UserEntity userEntity);
 
     @AfterMapping
@@ -49,5 +52,6 @@ public interface AdsMapper {
 
 
     @Mapping(target = "author", ignore = true)
+    @Mapping(target = "image", ignore = true)
     void editAdsEntity(AdsDto adsDto, @MappingTarget AdsEntity ads);
 }

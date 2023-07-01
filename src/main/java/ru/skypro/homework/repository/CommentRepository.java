@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
     List<CommentEntity> findAllByAdsId(Integer id);
 
-   Optional<CommentEntity> findByAdsIdAndId(Integer adId, Integer commentId);
+    Optional<CommentEntity> findByAdsIdAndId(Integer adId, Integer commentId);
 
 }
