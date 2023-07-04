@@ -3,14 +3,14 @@ Back-end часть проекта платформы по продаже вещ
 
 ## Используемые технологии
 # Основной проект:
-Java 11
-Maven
-Spring Boot
-Spring Web
-Spring Data JPA
-Spring Security
-Swagger
-Lombok
+- Java 11
+- Maven
+- Spring Boot
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- Swagger
+- Lombok
 # Работа БД:
-PostgreSQL
-Liquibase
+- PostgreSQL
+- Liquibase
