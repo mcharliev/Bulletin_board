@@ -12,12 +12,19 @@ import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
+import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 import java.util.List;
 
+/**
+ * Класс - сервис, содержащий реализацию интерфейса {@link AdsService}
+ *
+ * @see AdsEntity
+ * @see AdsRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class AdsServiceImpl implements AdsService {
@@ -26,6 +33,14 @@ public class AdsServiceImpl implements AdsService {
     private final UserService userService;
     private final ImageService imageService;
 
+
+    /**
+     * Метод ищет и возвращает полную информацию объявления по id
+     * {@link AdsRepository#findById(Object)}
+     *
+     * @return FullAdsDto
+     * @throws AdsNotFoundException если объявление не найдено
+     */
     public FullAdsDto getFullAdsById(Integer id) {
         AdsEntity adsEntity = adsRepository.findById(id)
                 .orElseThrow(AdsNotFoundException::new);
@@ -34,6 +49,14 @@ public class AdsServiceImpl implements AdsService {
         return fullAdsDto;
     }
 
+    /**
+     * Метод создает объявление
+     * {@link UserService#getUserEntity(Authentication)}
+     * {@link AdsMapper#createAdsDtoToAdsEntity(CreateAdsDto)}
+     * {@link ImageService#saveImage(MultipartFile)}
+     *
+     * @return AdsDto
+     */
     @Override
     public AdsDto createAds(CreateAdsDto createAds,
                             MultipartFile image,
@@ -45,10 +68,14 @@ public class AdsServiceImpl implements AdsService {
         adsEntity.setImage(imageEntity);
         adsRepository.save(adsEntity);
         AdsDto adsDto = adsMapper.adsEntityToAdsDto(adsEntity);
-        adsDto.setImage(String.format("/users/%s/image", adsEntity.getImage().getId()));
+        adsDto.setImage(String.format("/ads/%s/image", adsEntity.getImage().getId()));
         return adsDto;
     }
 
+    /**
+     * Метод удаляет объявление по id
+     * {@link AdsRepository#delete(Object)}
+     */
     @Override
     public void delete(Integer id, Authentication authentication) {
         if (checkRights(id, authentication)) {
@@ -60,6 +87,13 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
+    /**
+     * Метод ищет и возвращает список всех объявлений
+     * {@link AdsRepository#findAll()}
+     * {@link AdsRepository#findByTitleContainingIgnoreCaseOrderByTitle(String)}
+     *
+     * @return ResponseWrapperAdsDto
+     */
     @Override
     public ResponseWrapperAdsDto getAllAds(String title) {
         List<AdsEntity> adsEntityList;
@@ -72,6 +106,16 @@ public class AdsServiceImpl implements AdsService {
         return createResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
+    /**
+     * Метод редактирует объявление по id
+     * {@link AdsRepository#findById(Object)}
+     * {@link AdsMapper#editAdsEntity(AdsDto, AdsEntity)}
+     * {@link AdsRepository#save(Object)}
+     *
+     * @return {@link AdsMapper#adsEntityToCreateAdsDto(AdsEntity)}
+     * @throws AdsNotFoundException  если объявление не найдено
+     * @throws AccessDeniedException если нет прав на обновление комментария
+     */
     @Override
     public CreateAdsDto editAds(Integer id, AdsDto adsDto, Authentication authentication) {
         if (checkRights(id, authentication)) {
@@ -85,6 +129,14 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
+    /**
+     * Метод ищет и возвращает список всех объявлений авторизированного пользователя
+     * {@link UserService#getUserEntity(Authentication)}
+     * {@link AdsRepository#findAdsEntitiesByAuthorId(Integer)}
+     * {@link #insertLinkToAdsDtoList(List)} method}  }
+     *
+     * @return ResponseWrapperAdsDto
+     */
     @Override
     public ResponseWrapperAdsDto getAllMyAds(Authentication authentication) {
         Integer authorId = userService.getUserEntity(authentication).getId();
@@ -93,11 +145,25 @@ public class AdsServiceImpl implements AdsService {
         return createResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
+    /**
+     * Метод достает сущность объявления из база данных по id
+     *
+     * @return {@link AdsRepository#findById(Object)}
+     * @throws AdsNotFoundException если объяввление не найдено
+     */
     @Override
     public AdsEntity getAdsEntity(Integer adsId) {
         return adsRepository.findById(adsId).orElseThrow(AdsNotFoundException::new);
     }
 
+    /**
+     * Метод достает объявление из базы данных,
+     * устанавливает или обновляет его картинку, затем сохраняет изменения в базе данных:
+     * {@link ImageRepository#saveAndFlush(Object)}, {@link AdsRepository#save(Object)}
+     *
+     * @return String
+     * @throws AdsNotFoundException если объявление не найдено
+     */
     @Override
     public String updateAdsImage(Integer id, MultipartFile image) {
         AdsEntity adsEntity = getAdsEntity(id);
@@ -115,7 +181,11 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-
+    /**
+     * Метод переносит данные из List<AdsDto> в ResponseWrapperAdsDto
+     *
+     * @return ResponseWrapperAdsDto
+     */
     private ResponseWrapperAdsDto createResponseWrapperAdsDto(Integer count, List<AdsDto> adsDtoList) {
         ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
         responseWrapperAdsDto.setCount(count);
@@ -123,6 +193,11 @@ public class AdsServiceImpl implements AdsService {
         return responseWrapperAdsDto;
     }
 
+    /**
+     * Метод проверяет наличие доступа к редактированию или удалению объявления по id
+     *
+     * @throws AdsNotFoundException если объявление не найдено
+     */
     private boolean checkRights(Integer id, Authentication authentication) {
         AdsEntity adsEntity = adsRepository.findById(id).orElseThrow(AdsNotFoundException::new);
         UserEntity currentUser = userService.getUserEntity(authentication);
@@ -132,6 +207,11 @@ public class AdsServiceImpl implements AdsService {
         return authorAdsLogin.equals(currentUserLogin) || currentUserRole == Role.ADMIN;
     }
 
+    /**
+     * Метод переносит данные из List<AdsEntity> в List<AdsDto>
+     *
+     * @return AdsDto
+     */
     private List<AdsDto> insertLinkToAdsDtoList(List<AdsEntity> adsEntityList) {
         List<AdsDto> adsDtoList = adsMapper.toDtoList(adsEntityList);
         for (int i = 0; i < adsDtoList.size(); i++) {

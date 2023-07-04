@@ -20,12 +20,24 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+
+    /**
+     * Метод производит авторизацию пользователя в системе
+     * @return {@link PasswordEncoder#matches(CharSequence, String)}
+     */
     @Override
     public boolean login(String userName, String password) {
         UserDetails userDetails = userService.loadUserByUsername(userName);
         return passwordEncoder.matches(password, userDetails.getPassword());
     }
 
+    /**
+     * Метод регистрирует пользователя в системе:
+     * {@link UserRepository#findByEmail(String)}
+     * {@link UserMapper#registerReqDtoToUserEntity(RegisterReqDto)}
+     * {@link PasswordEncoder#encode(CharSequence)}
+     * @return {@link UserRepository#save(Object)}
+     */
     @Override
     public boolean register(RegisterReqDto registerReq, Role role) {
         if (userRepository.findByEmail(registerReq.getUsername()).isPresent()) {

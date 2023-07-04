@@ -15,6 +15,7 @@ import ru.skypro.homework.model.dto.UserDto;
 import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.UserMapper;
+import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.security.UserEntityDetails;
 import ru.skypro.homework.service.ImageService;
@@ -22,6 +23,9 @@ import ru.skypro.homework.service.UserService;
 
 import java.util.Optional;
 
+/**
+ * Класс - сервис, содержащий реализацию интерфейса {@link UserService} и {@link UserDetailsService}
+ */
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -31,6 +35,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder encoder;
 
 
+    /**
+     * Метод достает пользователя из базы данных {@link UserRepository#findByEmail(String)},
+     * редактирует данные и сохраняет в базе
+     *
+     * @return {@link UserRepository#save(Object)}, {@link UserMapper#userEntityToUserDto(UserEntity)}
+     * @see UserMapper
+     */
     @Override
     public UserDto update(UserDto userDto, Authentication authentication) {
         UserEntity oldUserEntity = userRepository.findByEmail(authentication.getName())
@@ -42,6 +53,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userDto;
     }
 
+    /**
+     * Метод достает пользователя из базы данных {@link UserRepository#findByEmail(String)}
+     * и конвертирует его в {@link UserDto}
+     *
+     * @return {@link UserMapper#userEntityToUserDto(UserEntity)}
+     */
     @Override
     public UserDto getUserDto(Authentication authentication) {
         String email = authentication.getName();
@@ -55,6 +72,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userDto;
     }
 
+    /**
+     * Метод меняет пароль {@link PasswordEncoder#encode(CharSequence)}
+     *
+     * @throws UserNotFoundException если пользователь не найден
+     */
     @Override
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto, Authentication authentication) {
         UserEntity userEntity = userRepository.findByEmail(authentication.getName())
@@ -72,12 +94,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
+    /**
+     * Метод достает сущность UserEntity из базе данных
+     *
+     * @return {@link UserRepository#findByEmail(String)}
+     * @throws UserNotFoundException если пользователь не найден
+     */
     @Override
     public UserEntity getUserEntity(Authentication authentication) {
         String email = authentication.getName();
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 
+    /**
+     * Метод находит пользователя по email и возвращает его данные: имя пользователя и пароль
+     *
+     * @return {@link UserDetails}
+     * @throws UsernameNotFoundException если пользователь не найден
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserEntity> optUserEntity = userRepository.findByEmail(username);
@@ -87,18 +121,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return new UserEntityDetails(optUserEntity.get());
     }
 
+    /**
+     * Метод достает пользователя из базы данных,
+     * устанавливает или обновляет его аватар, затем сохраняет изменения в базе данных:
+     * {@link ImageRepository#saveAndFlush(Object)}, {@link UserRepository#save(Object)}
+     *
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public String updateUserImage(MultipartFile image, Authentication authentication) {
         UserEntity userEntity = getUserEntity(authentication);
         ImageEntity oldImage = userEntity.getImage();
         if (oldImage == null) {
             ImageEntity newImage = imageService.saveImage(image);
             userEntity.setImage(newImage);
-            userRepository.saveAndFlush(userEntity);
+            userRepository.save(userEntity);
             return "image uploaded successfully";
         } else {
             ImageEntity updatedImage = imageService.updateImage(image, oldImage);
             userEntity.setImage(updatedImage);
-            userRepository.saveAndFlush(userEntity);
+            userRepository.save(userEntity);
             return "image uploaded successfully";
         }
     }

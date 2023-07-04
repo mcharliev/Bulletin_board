@@ -18,6 +18,11 @@ import java.util.UUID;
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
+    /**
+     * Метод сохраняет картинку в базу данных
+     *
+     * @return {@link ImageRepository#saveAndFlush(Object)}
+     */
     @Override
     public ImageEntity saveImage(MultipartFile image) {
         ImageEntity newImage = new ImageEntity();
@@ -31,6 +36,11 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.saveAndFlush(newImage);
     }
 
+    /**
+     * Метод обновляет и сохраняет картинку в базу данных
+     *
+     * @return {@link ImageRepository#saveAndFlush(Object)}
+     */
     @Override
     public ImageEntity updateImage(MultipartFile newImage, ImageEntity oldImage) {
         try {
@@ -42,13 +52,25 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.saveAndFlush(oldImage);
     }
 
+    /**
+     * Метод достает картинку из базы данных по ее id {
+     *
+     * @return {@link ImageRepository#findById(String)}
+     * @throws ImageNotFoundException если картинка не найдена
+     */
     @Override
     public byte[] getImageById(String id) {
         ImageEntity imageEntity = imageRepository.findById(id).orElseThrow(ImageNotFoundException::new);
         return imageEntity.getData();
     }
+
+    /**
+     * Метод достает Optional из базы данных по ее id {
+     *
+     * @return {@link ImageRepository#findById(String)}
+     */
     @Override
-    public Optional<ImageEntity> findImageEntityById(String id){
+    public Optional<ImageEntity> findImageEntityById(String id) {
         return imageRepository.findById(id);
     }
 }

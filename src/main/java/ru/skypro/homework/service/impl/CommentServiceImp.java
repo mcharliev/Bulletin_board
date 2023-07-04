@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.exception.AccessDeniedException;
+import ru.skypro.homework.exception.AdsNotFoundException;
 import ru.skypro.homework.exception.CommentNotFoundException;
+import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.dto.CommentDto;
 import ru.skypro.homework.model.dto.ResponseWrapperCommentDto;
 import ru.skypro.homework.model.dto.Role;
@@ -18,10 +20,15 @@ import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.UserService;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Класс - сервис, содержащий реализацию интерфейса {@link CommentService}
+ *
+ * @see CommentEntity
+ * @see CommentRepository
+ */
 @RequiredArgsConstructor
 @Service
 public class CommentServiceImp implements CommentService {
@@ -30,6 +37,15 @@ public class CommentServiceImp implements CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
 
+
+    /**
+     * Метод создает комментарий к объявлению по id объявления
+     *
+     * @return {@link CommentRepository#save(Object)}, {@link CommentMapper#commentEntityToCommentDto(CommentEntity)}
+     * @throws AdsNotFoundException  если объявление по указанному id не найдено
+     * @throws UserNotFoundException если пользователь не найден
+     * @see CommentMapper
+     */
     @Override
     public CommentDto createComment(Integer id, CommentDto commentDto, Authentication authentication) {
         CommentEntity commentEntity = commentMapper.commentDtoToCommentEntity(commentDto);
@@ -42,21 +58,31 @@ public class CommentServiceImp implements CommentService {
         CommentDto dto = commentMapper.commentEntityToCommentDto(commentEntity);
         ImageEntity imageEntity = commentEntity.getAuthor().getImage();
         if (imageEntity != null) {
-            dto.setAuthorImage(String.format("/ads/%s/image", userEntity.getImage().getId()));
+            dto.setAuthorImage(String.format("/users/%s/image", userEntity.getImage().getId()));
         }
         return dto;
     }
 
+    /**
+     * Метод ищет и возвращает список всех комментариев {@link ResponseWrapperCommentDto} к объявлению по id объявления
+     * <p>
+     * {@link CommentRepository#findAllByAdsId(Integer)}
+     * <p>
+     * {@link #createCommentDtoList(List<CommentEntity>) method}  }
+     */
     @Override
     public ResponseWrapperCommentDto getAllAdsComment(Integer id) {
         AdsEntity adsEntity = adsService.getAdsEntity(id);
-
         List<CommentEntity> adsCommentsList = commentRepository.findAllByAdsId(adsEntity.getId());
-
-        ResponseWrapperCommentDto responseWrapperCommentDto = createCommentDtoList(adsCommentsList);
-        return responseWrapperCommentDto;
+        return createCommentDtoList(adsCommentsList);
     }
 
+    /**
+     * Метод удаляет комментарий к объявлению по id объявления
+     * {@link CommentRepository#delete(Object)}
+     *
+     * @throws AccessDeniedException если нет прав на удаление комментария
+     */
     @Override
     public void deleteComment(Integer adId, Integer commentId, Authentication authentication) {
         if (checkRights(commentId, authentication)) {
@@ -68,6 +94,14 @@ public class CommentServiceImp implements CommentService {
         }
     }
 
+    /**
+     * Метод редактирует комментарий к объявлению по id
+     *
+     * @return {@link CommentRepository#save(Object)}, {@link CommentMapper#commentEntityToCommentDto(CommentEntity)}
+     * @throws CommentNotFoundException если комментарий не найден
+     * @throws AccessDeniedException    если нет прав на обновление комментария
+     * @see CommentMapper
+     */
     @Override
     public CommentDto editComment(Integer adId, Integer commentId, CommentDto comment, Authentication authentication) {
         if (checkRights(commentId, authentication)) {
@@ -83,6 +117,11 @@ public class CommentServiceImp implements CommentService {
         }
     }
 
+    /**
+     * Метод проверяет наличие доступа к редактированию или удалению комментария по id
+     *
+     * @throws CommentNotFoundException если комментарий не найден
+     */
     private boolean checkRights(Integer id, Authentication authentication) {
         CommentEntity commentEntity = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
         UserEntity currentUser = userService.getUserEntity(authentication);
@@ -92,6 +131,11 @@ public class CommentServiceImp implements CommentService {
         return authorCommentLogin.equals(currentUserLogin) || currentUserRole == Role.ADMIN;
     }
 
+    /**
+     * Метод переносит данные из List<CommentEntity> в List<CommentDto>
+     * <p>
+     * * @return {ResponseWrapperCommentDto}
+     */
     private ResponseWrapperCommentDto createCommentDtoList(List<CommentEntity> commentEntityList) {
 
         List<CommentDto> commentDtoList = commentMapper.toDtoList(commentEntityList);
