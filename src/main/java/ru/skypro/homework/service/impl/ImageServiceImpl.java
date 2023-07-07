@@ -73,4 +73,9 @@ public class ImageServiceImpl implements ImageService {
     public Optional<ImageEntity> findImageEntityById(String id) {
         return imageRepository.findById(id);
     }
+
+    @Override
+    public void deleteImage(ImageEntity imageEntity) {
+        imageRepository.delete(imageEntity);
+    }
 }

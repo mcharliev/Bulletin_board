@@ -12,4 +12,6 @@ public interface ImageService {
 
     byte[] getImageById(String id);
     Optional<ImageEntity> findImageEntityById(String id);
+
+    void deleteImage(ImageEntity imageEntity);
 }

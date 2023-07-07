@@ -19,7 +19,6 @@ public class ImageEntity {
     @Type(type = "org.hibernate.type.BinaryType")
     private byte[] data;
 
-
     public String getId() {
         return id;
     }

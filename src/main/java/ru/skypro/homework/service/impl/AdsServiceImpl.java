@@ -12,11 +12,13 @@ import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.model.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
+import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -32,6 +34,7 @@ public class AdsServiceImpl implements AdsService {
     private final AdsMapper adsMapper;
     private final UserService userService;
     private final ImageService imageService;
+    private final CommentRepository commentRepository;
 
 
     /**
@@ -76,12 +79,15 @@ public class AdsServiceImpl implements AdsService {
      * Метод удаляет объявление по id
      * {@link AdsRepository#delete(Object)}
      */
+    @Transactional
     @Override
     public void delete(Integer id, Authentication authentication) {
         if (checkRights(id, authentication)) {
             AdsEntity adsEntity = adsRepository.findById(id)
                     .orElseThrow(AdsNotFoundException::new);
-            adsRepository.delete(adsEntity);
+            imageService.deleteImage(adsEntity.getImage());
+            commentRepository.deleteAllByAdsId(id);
+            adsRepository.deleteById(id);
         } else {
             throw new AccessDeniedException();
         }

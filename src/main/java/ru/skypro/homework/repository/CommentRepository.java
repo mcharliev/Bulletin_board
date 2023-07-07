@@ -1,6 +1,7 @@
 package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import ru.skypro.homework.model.entity.AdsEntity;
 import ru.skypro.homework.model.entity.CommentEntity;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
 
     Optional<CommentEntity> findByAdsIdAndId(Integer adId, Integer commentId);
 
+    void deleteAllByAdsId(Integer id);
 }

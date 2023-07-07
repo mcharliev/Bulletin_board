@@ -47,8 +47,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         UserEntity oldUserEntity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
         UserEntity newUserEntity = userMapper.userDtoToUserEntity(userDto);
+        ImageEntity image = oldUserEntity.getImage();
+        if (image != null) {
+            newUserEntity.setImage(image);
+        }
         newUserEntity.setPassword(oldUserEntity.getPassword());
         newUserEntity.setRole(oldUserEntity.getRole());
+
         userRepository.save(newUserEntity);
         return userDto;
     }

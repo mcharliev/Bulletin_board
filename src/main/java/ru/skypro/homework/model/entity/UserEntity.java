@@ -1,7 +1,5 @@
 package ru.skypro.homework.model.entity;
 
-import lombok.*;
-import org.springframework.stereotype.Component;
 import ru.skypro.homework.model.dto.Role;
 
 import javax.persistence.*;
