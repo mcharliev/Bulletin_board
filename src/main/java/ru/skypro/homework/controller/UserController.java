@@ -34,7 +34,6 @@ public class UserController {
     private final UserService userService;
     private final ImageService imageService;
 
-
     @Operation(summary = "Обновить информацию об авторизованном пользователе",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",

@@ -86,8 +86,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto, Authentication authentication) {
         UserEntity userEntity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
-
-        if (encoder.matches(userEntity.getPassword(), newPasswordDto.getCurrentPassword())) {
+        String currentUserPassword = userEntity.getPassword();
+        if (encoder.matches(newPasswordDto.getCurrentPassword(), currentUserPassword)) {
             userEntity.setPassword(encoder.encode(newPasswordDto.getNewPassword()));
             userRepository.save(userEntity);
             NewPasswordDto dto = new NewPasswordDto();
