@@ -21,7 +21,7 @@ public class CommentEntity {
     private Integer id;
 
     @Column(name = "created_at")
-    private LocalDateTime localDateTime;
+    private LocalDateTime createAt;
 
     @Column(name = "text")
     private String text;

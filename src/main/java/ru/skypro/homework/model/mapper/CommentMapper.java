@@ -14,9 +14,11 @@ public interface CommentMapper {
 
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "author", source = "author.id")
+    @Mapping(target = "createAt", ignore = true)
     CommentDto commentEntityToCommentDto(CommentEntity entity);
 
     @Mapping(target ="author",ignore = true)
+    @Mapping(target = "createAt", ignore = true)
     CommentEntity commentDtoToCommentEntity(CommentDto dto);
 
     List<CommentEntity> toEntityList(Collection<CommentDto> commentDtoList);

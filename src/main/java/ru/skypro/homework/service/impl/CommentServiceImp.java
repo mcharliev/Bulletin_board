@@ -21,6 +21,8 @@ import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.UserService;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -48,14 +50,17 @@ public class CommentServiceImp implements CommentService {
      */
     @Override
     public CommentDto createComment(Integer id, CommentDto commentDto, Authentication authentication) {
-        CommentEntity commentEntity = commentMapper.commentDtoToCommentEntity(commentDto);
+        CommentEntity commentEntity = new CommentEntity();
         AdsEntity adsEntity = adsService.getAdsEntity(id);
         UserEntity userEntity = userService.getUserEntity(authentication);
+        commentEntity.setText(commentDto.getText());
         commentEntity.setAds(adsEntity);
         commentEntity.setAuthor(userEntity);
-        commentEntity.setLocalDateTime(LocalDateTime.now());
+        commentEntity.setCreateAt(LocalDateTime.now());
         commentRepository.save(commentEntity);
         CommentDto dto = commentMapper.commentEntityToCommentDto(commentEntity);
+        dto.setAuthorFirstName(commentEntity.getAuthor().getFirstName());
+        dto.setCreateAt(commentEntity.getCreateAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         ImageEntity imageEntity = commentEntity.getAuthor().getImage();
         if (imageEntity != null) {
             dto.setAuthorImage(String.format("/users/%s/image", userEntity.getImage().getId()));
@@ -109,7 +114,7 @@ public class CommentServiceImp implements CommentService {
             CommentEntity commentEntity = commentRepository.findByAdsIdAndId(adId, commentId)
                     .orElseThrow(CommentNotFoundException::new);
             commentEntity.setText(text);
-            commentEntity.setLocalDateTime(LocalDateTime.now());
+            commentEntity.setCreateAt(LocalDateTime.now());
             commentRepository.save(commentEntity);
             return commentMapper.commentEntityToCommentDto(commentEntity);
         } else {
@@ -141,6 +146,9 @@ public class CommentServiceImp implements CommentService {
         List<CommentDto> commentDtoList = commentMapper.toDtoList(commentEntityList);
 
         for (int i = 0; i < commentDtoList.size(); i++) {
+            commentDtoList.get(i).setCreateAt(commentEntityList.get(i).getCreateAt()
+                    .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            commentDtoList.get(i).setAuthorFirstName(commentEntityList.get(i).getAuthor().getFirstName());
             ImageEntity imageEntity = commentEntityList.get(i).getAuthor().getImage();
             if (imageEntity != null) {
                 String authorImageLink = String.format("/users/%s/image",
