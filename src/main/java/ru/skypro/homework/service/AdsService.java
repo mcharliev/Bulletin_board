@@ -17,7 +17,7 @@ public interface AdsService {
 
     ResponseWrapperAdsDto getAllAds(String title);
 
-    CreateAdsDto editAds(Integer id, AdsDto adsDto,Authentication authentication);
+    AdsDto editAds(Integer id, CreateAdsDto createAdsDto,Authentication authentication);
 
     ResponseWrapperAdsDto getAllMyAds(Authentication authentication);
 

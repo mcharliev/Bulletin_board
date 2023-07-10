@@ -102,10 +102,10 @@ public class AdsController {
             },
             tags = "Ads")
     @PatchMapping("/{id}")
-    public ResponseEntity<CreateAdsDto> updateAds(@PathVariable Integer id,
-                                                  @RequestBody AdsDto ads,
-                                                  Authentication authentication) {
-        return ResponseEntity.ok(adsService.editAds(id, ads, authentication));
+    public ResponseEntity<AdsDto> updateAds(@PathVariable Integer id,
+                                            @RequestBody CreateAdsDto createAdsDto,
+                                            Authentication authentication) {
+        return ResponseEntity.ok(adsService.editAds(id, createAdsDto, authentication));
     }
 
     @Operation(

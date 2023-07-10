@@ -44,18 +44,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      */
     @Override
     public UserDto update(UserDto userDto, Authentication authentication) {
-        UserEntity oldUserEntity = userRepository.findByEmail(authentication.getName())
+        UserEntity currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
-        UserEntity newUserEntity = userMapper.userDtoToUserEntity(userDto);
-        ImageEntity image = oldUserEntity.getImage();
-        if (image != null) {
-            newUserEntity.setImage(image);
-        }
-        newUserEntity.setPassword(oldUserEntity.getPassword());
-        newUserEntity.setRole(oldUserEntity.getRole());
-
-        userRepository.save(newUserEntity);
-        return userDto;
+        currentUser.setFirstName(userDto.getFirstName());
+        currentUser.setLastName(userDto.getLastName());
+        currentUser.setPhone(userDto.getPhone());
+        userRepository.save(currentUser);
+        return userMapper.userEntityToUserDto(currentUser);
     }
 
     /**
@@ -69,12 +64,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         String email = authentication.getName();
         UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
-        UserDto userDto = userMapper.userEntityToUserDto(userEntity);
-        ImageEntity imageEntity = userEntity.getImage();
-        if (imageEntity != null) {
-            userDto.setImage(String.format("/users/%s/image", userEntity.getImage().getId()));
-        }
-        return userDto;
+        return userMapper.userEntityToUserDto(userEntity);
     }
 
     /**

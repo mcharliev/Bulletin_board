@@ -43,7 +43,6 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.findByEmail(registerReq.getUsername()).isPresent()) {
             return false;
         }
-        registerReq.setRole(role);
         UserEntity userEntity = userMapper.registerReqDtoToUserEntity(registerReq);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
