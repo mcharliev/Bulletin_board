@@ -1,47 +1,51 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.RegisterReq;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.model.dto.RegisterReqDto;
+import ru.skypro.homework.model.dto.Role;
+import ru.skypro.homework.model.entity.UserEntity;
+import ru.skypro.homework.model.mapper.UserMapper;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private final UserDetailsManager manager;
+    private final UserServiceImpl userService;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-  private final PasswordEncoder encoder;
 
-  public AuthServiceImpl(UserDetailsManager manager, PasswordEncoder passwordEncoder) {
-    this.manager = manager;
-    this.encoder = passwordEncoder;
-  }
-
-  @Override
-  public boolean login(String userName, String password) {
-    if (!manager.userExists(userName)) {
-      return false;
+    /**
+     * Метод производит авторизацию пользователя в системе
+     * @return {@link PasswordEncoder#matches(CharSequence, String)}
+     */
+    @Override
+    public boolean login(String userName, String password) {
+        UserDetails userDetails = userService.loadUserByUsername(userName);
+        return passwordEncoder.matches(password, userDetails.getPassword());
     }
-    UserDetails userDetails = manager.loadUserByUsername(userName);
-    return encoder.matches(password, userDetails.getPassword());
-  }
 
-  @Override
-  public boolean register(RegisterReq registerReq, Role role) {
-    if (manager.userExists(registerReq.getUsername())) {
-      return false;
+    /**
+     * Метод регистрирует пользователя в системе:
+     * {@link UserRepository#findByEmail(String)}
+     * {@link UserMapper#registerReqDtoToUserEntity(RegisterReqDto)}
+     * {@link PasswordEncoder#encode(CharSequence)}
+     * @return {@link UserRepository#save(Object)}
+     */
+    @Override
+    public boolean register(RegisterReqDto registerReq, Role role) {
+        if (userRepository.findByEmail(registerReq.getUsername()).isPresent()) {
+            return false;
+        }
+        UserEntity userEntity = userMapper.registerReqDtoToUserEntity(registerReq);
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userRepository.save(userEntity);
+        return true;
     }
-    manager.createUser(
-        User.builder()
-            .passwordEncoder(this.encoder::encode)
-            .password(registerReq.getPassword())
-            .username(registerReq.getUsername())
-            .roles(role.name())
-            .build());
-    return true;
-  }
 }
